@@ -1,6 +1,35 @@
 #!/bin/sh
-pwd
+
+# Função para exibir uma moldura
+print_frame() {
+  local message="$1"
+  local length=${#message}
+  local border=$(printf '═%.0s' $(seq 1 $((length + 4))))
+
+  echo "╔$border╗"
+  echo "║  $message  ║"
+  echo "╚$border╝"
+}
+
+# Entrar no diretório src
 cd src
-pwd
-go build -v ./... 
+
+# Exibir mensagem para o build
+print_frame "Running go build"
+go build -v ./...
+if [ $? -ne 0 ]; then
+  print_frame "❌ Build failed"
+  exit 1
+else
+  print_frame "✅ Build succeeded"
+fi
+
+# Exibir mensagem para os testes
+print_frame "Running go test"
 go test -v ./...
+if [ $? -ne 0 ]; then
+  print_frame "❌ Tests failed"
+  exit 1
+else
+  print_frame "✅ All tests passed"
+fi
