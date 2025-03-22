@@ -15,8 +15,6 @@ func main() {
 		os.Exit(0)
 	}()
 
-	// Get list of query files available
-
 	// Get Target DB connection
 
 	// Loop through each query file

@@ -3,20 +3,17 @@ package filesystem
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/luizhp/query-extract/internal/entity"
 )
 
-type File struct {
-	Name string
-	Path string
-}
-
-func ListFolder(folder string, extension string) ([]File, error) {
+func ListFolder(folder string, extension string) ([]entity.File, error) {
 	entries, err := os.ReadDir(folder)
 	if err != nil {
 		return nil, err
 	}
 
-	var files []File
+	var files []entity.File
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -30,7 +27,7 @@ func ListFolder(folder string, extension string) ([]File, error) {
 			continue
 		}
 
-		files = append(files, File{
+		files = append(files, entity.File{
 			Name: entry.Name(),
 			Path: filepath.Join(folder, entry.Name()),
 		})
