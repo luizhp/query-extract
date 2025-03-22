@@ -1,0 +1,6 @@
+#!/bin/sh
+pwd
+cd src
+pwd
+go build -v ./... 
+go test -v ./...
