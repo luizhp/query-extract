@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 
@@ -17,6 +18,9 @@ func ListFolder(folder string, extension string) ([]entity.File, error) {
 	for _, entry := range entries {
 
 		fileExtension := filepath.Ext(entry.Name())
+		if fileExtension != "" {
+			fileExtension = fileExtension[1:]
+		}
 		fileName := entry.Name()[:len(entry.Name())-len(fileExtension)]
 
 		if entry.IsDir() {
@@ -36,4 +40,23 @@ func ListFolder(folder string, extension string) ([]entity.File, error) {
 
 	return files, nil
 
+}
+
+func LoadFile(file entity.File) (string, error) {
+	f, err := os.Open(file.GetFullPath())
+	if err != nil {
+		return "", err
+	}
+	defer func() error {
+		if err = f.Close(); err != nil {
+			return err
+		}
+		return nil
+	}()
+
+	b, err := io.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
 }

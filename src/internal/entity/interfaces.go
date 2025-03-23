@@ -5,6 +5,7 @@ type FileInterface interface {
 	GetPath() string
 	GetExtension() string
 	GetFilename() string
+	GetFullPath() string
 }
 
 type ResultsInterface interface {

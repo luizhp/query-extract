@@ -22,7 +22,7 @@ func main() {
 	}()
 
 	queriesFolder := "/home/user/Documents/dev/luizhp/QueryExtract/data/queries"
-	queriesExtension := ".sql"
+	queriesExtension := "sql"
 	// outputFolder := "/home/user/Documents/dev/luizhp/QueryExtract/data/output"
 
 	// Get list of query files available
@@ -49,17 +49,15 @@ func main() {
 	mysqlDB.SetConnMaxLifetime(time.Minute * 20)
 	defer mysqlDB.Close()
 
-	// Loop through each query file
-	// 	- Read the query file
-	// 	- Execute the query
-	// 	- Dump Result to a csv file
+	// Process each job
 	for _, queryFile := range queriesCollection {
 		j := database.NewJob(mysqlDB, queryFile)
-		err := j.Process()
-		if err != nil {
+		if err := j.Process(); err != nil {
 			log.Printf("☠️ Error: %v\n", err)
 			os.Exit(1)
 		}
+		// 	- Dump Result to a csv file
+
 	}
 
 }

@@ -1,5 +1,7 @@
 package entity
 
+import "fmt"
+
 type File struct {
 	Name      string
 	Extension string
@@ -28,4 +30,8 @@ func (f *File) GetExtension() string {
 
 func (f *File) GetFilename() string {
 	return f.Name + f.Extension
+}
+
+func (f *File) GetFullPath() string {
+	return fmt.Sprintf("%s/%s%s", f.Path, f.Name, f.Extension)
 }
