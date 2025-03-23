@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -16,9 +17,9 @@ func TestListFolder(t *testing.T) {
 		isDir     bool
 		extension string
 	}{
-		{"file1.txt", false, ".txt"},
-		{"file2.log", false, ".log"},
-		{"file3.txt", false, ".txt"},
+		{"file1.txt", false, "txt"},
+		{"file2.log", false, "log"},
+		{"file3.txt", false, "txt"},
 		{".hiddenfile", false, ""},
 		{"subdir", true, ""},
 	}
@@ -45,14 +46,15 @@ func TestListFolder(t *testing.T) {
 		expected  int
 	}{
 		{"All files", "", 3}, // Excludes hidden files and directories
-		{"Only .txt files", ".txt", 2},
-		{"Only .log files", ".log", 1},
-		{"Non-existent extension", ".csv", 0},
+		{"Only .txt files", "txt", 2},
+		{"Only .log files", "log", 1},
+		{"Non-existent extension", "csv", 0},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			files, _ := ListFolder(tempDir, tt.extension)
+			log.Printf("%v - %v ", tt.extension, files)
 			if len(files) != tt.expected {
 				t.Errorf("Expected %d files, got %d", tt.expected, len(files))
 			}
