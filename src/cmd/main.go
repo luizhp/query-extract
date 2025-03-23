@@ -23,7 +23,7 @@ func main() {
 
 	queriesFolder := "/home/user/Documents/dev/luizhp/QueryExtract/data/queries"
 	queriesExtension := "sql"
-	// outputFolder := "/home/user/Documents/dev/luizhp/QueryExtract/data/output"
+	outputFolder := "/home/user/Documents/dev/luizhp/QueryExtract/data/output"
 
 	// Get list of query files available
 	queriesCollection, err := filesystem.ListFolder(queriesFolder, queriesExtension)
@@ -51,13 +51,16 @@ func main() {
 
 	// Process each job
 	for _, queryFile := range queriesCollection {
-		j := database.NewJob(mysqlDB, queryFile)
-		if err := j.Process(); err != nil {
+		job := database.NewJob(mysqlDB, queryFile, outputFolder)
+		if err := job.Extract(); err != nil {
 			log.Printf("☠️ Error: %v\n", err)
 			os.Exit(1)
 		}
-		// 	- Dump Result to a csv file
-
+		// Dump Result to a csv file
+		if err := job.Dump("csv"); err != nil {
+			log.Printf("☠️ Error: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
 }

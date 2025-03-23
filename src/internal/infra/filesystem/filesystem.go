@@ -17,11 +17,14 @@ func ListFolder(folder string, extension string) ([]entity.File, error) {
 	var files []entity.File
 	for _, entry := range entries {
 
+		fileName := entry.Name()
 		fileExtension := filepath.Ext(entry.Name())
+		fileName = fileName[:len(fileName)-len(fileExtension)]
+
 		if fileExtension != "" {
 			fileExtension = fileExtension[1:]
 		}
-		fileName := entry.Name()[:len(entry.Name())-len(fileExtension)]
+		// fileName := entry.Name()[:len(entry.Name())-len(fileExtension)]
 
 		if entry.IsDir() {
 			continue

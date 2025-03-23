@@ -33,5 +33,5 @@ func (f *File) GetFilename() string {
 }
 
 func (f *File) GetFullPath() string {
-	return fmt.Sprintf("%s/%s%s", f.Path, f.Name, f.Extension)
+	return fmt.Sprintf("%s/%s.%s", f.Path, f.Name, f.Extension)
 }

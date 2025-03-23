@@ -1,25 +1,30 @@
 package database
 
 import (
+	"bytes"
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/luizhp/query-extract/internal/entity"
+	"github.com/luizhp/query-extract/internal/infra/csv"
 	"github.com/luizhp/query-extract/internal/infra/filesystem"
 )
 
 type Job struct {
-	DB      *sql.DB
-	File    entity.File
-	Results entity.Results
+	DB           *sql.DB
+	File         entity.File
+	Results      entity.Results
+	OutputFolder string
 }
 
-func NewJob(db *sql.DB, file entity.File) *Job {
+func NewJob(db *sql.DB, file entity.File, outputFolder string) *Job {
 	return &Job{
-		DB:      db,
-		File:    file,
-		Results: entity.Results{},
+		DB:           db,
+		File:         file,
+		Results:      entity.Results{},
+		OutputFolder: outputFolder,
 	}
 }
 
@@ -35,14 +40,18 @@ func (b *Job) GetResults() entity.Results {
 	return b.Results
 }
 
-func (b *Job) Process() error {
+func (b *Job) GetOutputFolder() string {
+	return b.OutputFolder
+}
+
+func (b *Job) Extract() error {
 
 	var startedAt, finishedAt time.Time
 	startedAt = time.Now()
 
 	defer func() {
 		finishedAt = time.Now()
-		log.Printf("🌟 Job finished with sucess. It took %v\n", finishedAt.Sub(startedAt))
+		log.Printf("🌟 [%s] Data extraction with sucess. It took %v\n", b.File.GetName(), finishedAt.Sub(startedAt))
 	}()
 
 	// Load query from file
@@ -60,14 +69,13 @@ func (b *Job) Process() error {
 	defer rows.Close()
 	log.Printf("🏃 [%s] Executing query\n", b.File.GetName())
 
-	// Save results
-	// // Get Column Names
+	// Get Column Names
 	columns, err := rows.Columns()
 	if err != nil {
 		return err
 	}
 
-	// // Get Rows
+	// Get Rows
 	var rowsData []map[string]interface{}
 	for rows.Next() {
 		columnsData := make([]interface{}, len(columns))
@@ -90,4 +98,30 @@ func (b *Job) Process() error {
 
 	return nil
 
+}
+
+func (b *Job) Dump(format string) error {
+
+	var startedAt, finishedAt time.Time
+	startedAt = time.Now()
+
+	defer func() {
+		finishedAt = time.Now()
+		log.Printf("📦 [%s] Dump generated with sucess. It took %v\n", b.File.GetName(), finishedAt.Sub(startedAt))
+	}()
+
+	log.Printf("📦 [%s] Dumping %d rows\n", b.File.GetName(), b.Results.GetTotalRows())
+
+	var buffer bytes.Buffer
+	switch format {
+	case "csv":
+		buffer.WriteString(csv.Header(b.Results.GetColumns()))
+		buffer.WriteString(csv.Detail(b.Results.GetColumns(), b.Results.GetRows()))
+	default:
+		return fmt.Errorf("☠️ Error: Format %s not supported", format)
+	}
+
+	fmt.Println(buffer.String())
+
+	return nil
 }

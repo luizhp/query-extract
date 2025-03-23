@@ -9,5 +9,8 @@ import (
 type JobInterface interface {
 	GetDB() *sql.DB
 	GetFile() entity.File
-	Process() error
+	GetResults() entity.Results
+	GetOutputFolder() string
+	Extract() error
+	Dump() error
 }
