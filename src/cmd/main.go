@@ -22,14 +22,16 @@ func main() {
 	// outputFolder := "/home/user/Documents/dev/luizhp/QueryExtract/data/output"
 
 	// Get list of query files available
-	queries, err := filesystem.ListFolder(queriesFolder, queriesExtension)
+	queriesCollection, err := filesystem.ListFolder(queriesFolder, queriesExtension)
 	if err != nil {
 		log.Printf("☠️ Error: %v\n", err)
 		os.Exit(1)
 	}
-	if len(queries) == 0 {
+	if len(queriesCollection) == 0 {
 		log.Printf("☠️ Error: No queries found at %v\n", queriesFolder)
 		os.Exit(1)
+	} else {
+		log.Printf("📁 Found %v queries\n", len(queriesCollection))
 	}
 
 	// Get Target DB connection
