@@ -15,11 +15,15 @@ func ListFolder(folder string, extension string) ([]entity.File, error) {
 
 	var files []entity.File
 	for _, entry := range entries {
+
+		fileExtension := filepath.Ext(entry.Name())
+		fileName := entry.Name()[:len(entry.Name())-len(fileExtension)]
+
 		if entry.IsDir() {
 			continue
 		}
 
-		if extension != "" && extension != filepath.Ext(entry.Name()) {
+		if extension != "" && extension != fileExtension {
 			continue
 		}
 
@@ -27,10 +31,7 @@ func ListFolder(folder string, extension string) ([]entity.File, error) {
 			continue
 		}
 
-		files = append(files, entity.File{
-			Name: entry.Name(),
-			Path: filepath.Join(folder, entry.Name()),
-		})
+		files = append(files, *entity.NewFile(fileName, fileExtension, folder))
 	}
 
 	return files, nil

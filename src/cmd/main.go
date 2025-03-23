@@ -1,11 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"os"
 	"time"
 
+	"github.com/luizhp/query-extract/internal/infra/database"
 	"github.com/luizhp/query-extract/internal/infra/filesystem"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
@@ -18,7 +22,7 @@ func main() {
 	}()
 
 	queriesFolder := "/home/user/Documents/dev/luizhp/QueryExtract/data/queries"
-	queriesExtension := "sql"
+	queriesExtension := ".sql"
 	// outputFolder := "/home/user/Documents/dev/luizhp/QueryExtract/data/output"
 
 	// Get list of query files available
@@ -35,10 +39,27 @@ func main() {
 	}
 
 	// Get Target DB connection
+	mysqlDB, err := sql.Open("mysql", "appuser:apppassword@tcp(localhost:3306)/appdb?parseTime=false")
+	if err != nil {
+		log.Printf("☠️ Error: %v\n", err)
+		os.Exit(1)
+	} else {
+		log.Printf("🔗 Open mysql connection")
+	}
+	mysqlDB.SetConnMaxLifetime(time.Minute * 20)
+	defer mysqlDB.Close()
 
 	// Loop through each query file
 	// 	- Read the query file
 	// 	- Execute the query
 	// 	- Dump Result to a csv file
+	for _, queryFile := range queriesCollection {
+		j := database.NewJob(mysqlDB, queryFile)
+		err := j.Process()
+		if err != nil {
+			log.Printf("☠️ Error: %v\n", err)
+			os.Exit(1)
+		}
+	}
 
 }
