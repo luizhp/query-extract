@@ -121,7 +121,15 @@ func (b *Job) Dump(format string) error {
 		return fmt.Errorf("☠️ Error: Format %s not supported", format)
 	}
 
-	fmt.Println(buffer.String())
+	if err := filesystem.CreateFolder(b.OutputFolder); err != nil {
+		return err
+	}
+
+	if err := filesystem.WriteFile(b.OutputFolder+"/"+b.File.GetName()+".csv", buffer.String()); err != nil {
+		return err
+	}
+
+	// fmt.Println(buffer.String())
 
 	return nil
 }

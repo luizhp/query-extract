@@ -63,3 +63,30 @@ func LoadFile(file entity.File) (string, error) {
 	}
 	return string(b), nil
 }
+
+func CreateFolder(folderPath string) error {
+	err := os.MkdirAll(folderPath, 0755)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func WriteFile(filePath string, data string) error {
+	f, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer func() error {
+		if err = f.Close(); err != nil {
+			return err
+		}
+		return nil
+	}()
+
+	_, err = f.WriteString(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
