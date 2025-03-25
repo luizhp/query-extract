@@ -49,8 +49,8 @@ func Convert(data interface{}) string {
 	switch v := data.(type) {
 	case int64, int32, int16, int8, int:
 		valueConverted = fmt.Sprintf("%d", v)
-	case float64, float32:
-		valueConverted = fmt.Sprintf("%f", v)
+	// case float64, float32:
+	// 	valueConverted = fmt.Sprintf("%f", v)
 	case bool:
 		valueConverted = fmt.Sprintf("%t", v)
 	case []byte:
