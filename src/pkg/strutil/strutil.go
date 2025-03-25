@@ -3,7 +3,6 @@ package strutil
 import (
 	"fmt"
 	"regexp"
-	"strconv"
 	"time"
 )
 
@@ -46,23 +45,14 @@ func ConvertToDateTime(valueData string) (string, error) {
 }
 
 func ConvertFloatToString(valueData string, decimalSeparator string) (string, error) {
-	floatValueConverted, err := strconv.ParseFloat(valueData, 64)
-	if err != nil {
-		return valueData, err
+	decimalPointIndex := regexp.MustCompile(`\.`).FindStringIndex(valueData)
+	if decimalPointIndex == nil {
+		return valueData, nil
 	}
 
-	stringValueConverted := strconv.FormatFloat(floatValueConverted, 'f', -1, 64)
-	re := regexp.MustCompile(`\.(\d*)`)
-	matches := re.FindStringSubmatch(stringValueConverted)
-	var decimalPart string = ""
-	if len(matches) > 1 {
-		decimalPart = matches[1]
-	}
+	var intValue string = valueData[:decimalPointIndex[0]]
+	var decimalValue string = valueData[decimalPointIndex[0]+1:]
 
-	intPart := int64(floatValueConverted)
-	if decimalPart == "" {
-		decimalSeparator = ""
-	}
-
-	return fmt.Sprintf("%d%s%s", intPart, decimalSeparator, decimalPart), nil
+	retorno := fmt.Sprintf("%s%s%s", intValue, decimalSeparator, decimalValue)
+	return retorno, nil
 }
