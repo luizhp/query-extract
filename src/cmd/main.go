@@ -39,18 +39,19 @@ func main() {
 	}
 
 	// Get Target DB connection
+	var db database.DBInstance
 	dsn := "appuser:apppassword@tcp(localhost:3306)/appdb?parseTime=false"
-	mySQLDbInstance, err := database.NewMySQLInstance(dsn)
+	db, err = database.NewMySQLInstance(dsn)
 	if err != nil {
 		log.Printf("☠️ Error: %v\n", err)
 		os.Exit(1)
 	}
-	mySQLDbInstance.GetDB().SetConnMaxLifetime(time.Minute * 20)
-	defer mySQLDbInstance.Close()
+	db.GetDB().SetConnMaxLifetime(time.Minute * 20)
+	defer db.Close()
 
 	// Process each job
 	for _, queryFile := range queriesCollection {
-		job := job.NewJob(mySQLDbInstance.GetDB(), queryFile, outputFolder)
+		job := job.NewJob(db.GetDB(), queryFile, outputFolder)
 		if err := job.Extract(); err != nil {
 			log.Printf("☠️ Error: %v\n", err)
 			os.Exit(1)
