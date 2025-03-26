@@ -1,13 +1,13 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"os"
 	"time"
 
 	"github.com/luizhp/query-extract/internal/infra/database"
 	"github.com/luizhp/query-extract/internal/infra/filesystem"
+	"github.com/luizhp/query-extract/pkg/job"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -39,19 +39,18 @@ func main() {
 	}
 
 	// Get Target DB connection
-	mysqlDB, err := sql.Open("mysql", "appuser:apppassword@tcp(localhost:3306)/appdb?parseTime=false")
+	dsn := "appuser:apppassword@tcp(localhost:3306)/appdb?parseTime=false"
+	mySQLDbInstance, err := database.NewMySQLInstance(dsn)
 	if err != nil {
 		log.Printf("☠️ Error: %v\n", err)
 		os.Exit(1)
-	} else {
-		log.Printf("🔗 Open mysql connection")
 	}
-	mysqlDB.SetConnMaxLifetime(time.Minute * 20)
-	defer mysqlDB.Close()
+	mySQLDbInstance.GetDB().SetConnMaxLifetime(time.Minute * 20)
+	defer mySQLDbInstance.Close()
 
 	// Process each job
 	for _, queryFile := range queriesCollection {
-		job := database.NewJob(mysqlDB, queryFile, outputFolder)
+		job := job.NewJob(mySQLDbInstance.GetDB(), queryFile, outputFolder)
 		if err := job.Extract(); err != nil {
 			log.Printf("☠️ Error: %v\n", err)
 			os.Exit(1)
