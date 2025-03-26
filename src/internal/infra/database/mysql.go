@@ -7,6 +7,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+const DBVENDOR = "mysql"
+
 // MySQLInstance implements the DBInstance interface
 type MySQLInstance struct {
 	db *sql.DB
@@ -14,7 +16,7 @@ type MySQLInstance struct {
 
 // NewMySQLInstance creates a new MySQLInstance and establishes a connection
 func NewMySQLInstance(dsn string) (*MySQLInstance, error) {
-	db, err := sql.Open("mysql", dsn)
+	db, err := sql.Open(DBVENDOR, dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +26,7 @@ func NewMySQLInstance(dsn string) (*MySQLInstance, error) {
 		return nil, err
 	}
 
-	log.Println("🔗 MySQL connection established")
+	log.Printf("🔗 %s connection established\n", DBVENDOR)
 	return &MySQLInstance{db: db}, nil
 }
 
@@ -35,6 +37,11 @@ func (m *MySQLInstance) GetDB() *sql.DB {
 
 // Close closes the database connection
 func (m *MySQLInstance) Close() error {
-	log.Println("🔒 Closing MySQL connection")
+	log.Printf("🔒 Closing %s connection\n", DBVENDOR)
 	return m.db.Close()
+}
+
+// GetDBVendor returns the database vendor
+func (m *MySQLInstance) GetDBVendor() string {
+	return DBVENDOR
 }
