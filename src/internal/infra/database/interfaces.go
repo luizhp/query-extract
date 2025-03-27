@@ -5,7 +5,7 @@ import (
 )
 
 type DBInstance interface {
-	GetDBVendor() string
 	GetDB() *sql.DB
+	GetDBVendor() string
 	Close() error
 }
