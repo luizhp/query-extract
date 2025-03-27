@@ -1,5 +1,7 @@
 package entity
 
+import "time"
+
 type FileInterface interface {
 	GetName() string
 	GetPath() string
@@ -8,11 +10,22 @@ type FileInterface interface {
 	GetFullPath() string
 }
 
-type ResultsInterface interface {
+type ResultInterface interface {
 	GetColumns() []string
 	GetRows() []map[string]interface{}
 	GetTotalRows() int
-	GetStartedAt() string
-	GetFinishedAt() string
-	GetDuration() string
+	GetStartedAt() time.Time
+	GetFinishedAt() time.Time
+	GetDuration() time.Duration
+}
+
+type ColumnInterface interface {
+	GetPosition() int64
+	GetName() string
+	GetDatabaseTypeName() string
+	GetScanType() interface{}
+	GetLength() int64
+	GetPrecision() int64
+	GetScale() int64
+	GetNullable() bool
 }

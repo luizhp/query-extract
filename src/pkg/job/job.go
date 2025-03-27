@@ -2,6 +2,7 @@ package job
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -15,7 +16,7 @@ import (
 type Job struct {
 	DB           *sql.DB
 	File         entity.File
-	Results      entity.Results
+	Result       entity.Result
 	OutputFolder string
 }
 
@@ -23,7 +24,7 @@ func NewJob(db *sql.DB, file entity.File, outputFolder string) *Job {
 	return &Job{
 		DB:           db,
 		File:         file,
-		Results:      entity.Results{},
+		Result:       entity.Result{},
 		OutputFolder: outputFolder,
 	}
 }
@@ -36,8 +37,8 @@ func (b *Job) GetFile() entity.File {
 	return b.File
 }
 
-func (b *Job) GetResults() entity.Results {
-	return b.Results
+func (b *Job) GetResult() entity.Result {
+	return b.Result
 }
 
 func (b *Job) GetOutputFolder() string {
@@ -61,8 +62,11 @@ func (b *Job) Extract() error {
 	}
 	log.Printf("📄 [%s] Query loaded\n", b.File.GetName())
 
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
 	// Execute query
-	rows, err := b.GetDB().Query(query)
+	rows, err := b.GetDB().QueryContext(ctx, query)
 	if err != nil {
 		return err
 	}
@@ -73,6 +77,37 @@ func (b *Job) Extract() error {
 	columns, err := rows.Columns()
 	if err != nil {
 		return err
+	}
+
+	columnsTypes, err := rows.ColumnTypes()
+	if err != nil {
+		return err
+	}
+	for _, columnType := range columnsTypes {
+		// log.Printf("🔍 [%s] Column %s is of type %s\n", b.File.GetName(), columns[i], columnType.DatabaseTypeName())
+
+		log.Printf("🔍 Column Name: %s\n", columnType.Name())
+		log.Printf("Column DatabaseTypeName: %s\n", columnType.DatabaseTypeName())
+
+		length, ok := columnType.Length()
+		if ok {
+			log.Printf("Column has length %d\n", length)
+		}
+
+		precision, scale, ok := columnType.DecimalSize()
+		if ok {
+			log.Printf("Column has precision %d and scale %d\n", precision, scale)
+		}
+
+		log.Printf("Column ScanType: %s\n", columnType.ScanType())
+		nullable, ok := columnType.Nullable()
+		if ok {
+			log.Printf("Column Nullable: %t\n", nullable)
+		}
+
+		// log.Printf("Column ScanType Align: %v ", columnType.ScanType().Align())
+		// log.Printf("Column ScanType Bits: %v ", columnType.ScanType().Bits())
+
 	}
 
 	// Get Rows
@@ -94,7 +129,7 @@ func (b *Job) Extract() error {
 		}
 		rowsData = append(rowsData, rowData)
 	}
-	b.Results = *entity.NewResults(columns, rowsData, startedAt, time.Now())
+	b.Result = *entity.NewResult(columns, rowsData, startedAt, time.Now())
 
 	return nil
 
@@ -110,13 +145,13 @@ func (b *Job) Dump(format string) error {
 		log.Printf("📦 [%s] Dump generated with sucess. It took %v\n", b.File.GetName(), finishedAt.Sub(startedAt))
 	}()
 
-	log.Printf("📦 [%s] Dumping %d rows\n", b.File.GetName(), b.Results.GetTotalRows())
+	log.Printf("📦 [%s] Dumping %d rows\n", b.File.GetName(), b.Result.GetTotalRows())
 
 	var buffer bytes.Buffer
 	switch format {
 	case "csv":
-		buffer.WriteString(csv.Header(b.Results.GetColumns()))
-		buffer.WriteString(csv.Detail(b.Results.GetColumns(), b.Results.GetRows()))
+		buffer.WriteString(csv.Header(b.Result.GetColumns()))
+		buffer.WriteString(csv.Detail(b.Result.GetColumns(), b.Result.GetRows()))
 	default:
 		return fmt.Errorf("☠️ Error: Format %s not supported", format)
 	}

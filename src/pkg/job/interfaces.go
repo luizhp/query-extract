@@ -9,7 +9,7 @@ import (
 type JobInterface interface {
 	GetDB() *sql.DB
 	GetFile() entity.File
-	GetResults() entity.Results
+	GetResult() entity.Result
 	GetOutputFolder() string
 	Extract() error
 	Dump() error
