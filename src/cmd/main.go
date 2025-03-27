@@ -40,14 +40,25 @@ func main() {
 
 	// Get Target DB connection
 	var db database.DBInstance
-	dsn := "appuser:apppassword@tcp(localhost:3306)/appdb?parseTime=false"
-	db, err = database.NewMySQLInstance(dsn)
+	dsn := "sqlserver://sa:StrongPassword123@localhost?database=queryextract"
+	db, err = database.NewMSSQLInstance(dsn)
 	if err != nil {
 		log.Printf("☠️ Error: %v\n", err)
 		os.Exit(1)
 	}
 	db.GetDB().SetConnMaxLifetime(time.Minute * 20)
 	defer db.Close()
+
+	// MySQL 8
+	// var db database.DBInstance
+	// dsn := "appuser:apppassword@tcp(localhost:3306)/appdb?parseTime=false"
+	// db, err = database.NewMySQLInstance(dsn)
+	// if err != nil {
+	// 	log.Printf("☠️ Error: %v\n", err)
+	// 	os.Exit(1)
+	// }
+	// db.GetDB().SetConnMaxLifetime(time.Minute * 20)
+	// defer db.Close()
 
 	// Process each job
 	for _, queryFile := range queriesCollection {
