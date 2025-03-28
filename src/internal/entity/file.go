@@ -3,35 +3,35 @@ package entity
 import "fmt"
 
 type File struct {
-	Name      string
-	Extension string
-	Path      string
+	name      string
+	extension string
+	path      string
 }
 
 func NewFile(name, extension, path string) *File {
 	return &File{
-		Name:      name,
-		Extension: extension,
-		Path:      path,
+		name:      name,
+		extension: extension,
+		path:      path,
 	}
 }
 
 func (f *File) GetName() string {
-	return f.Name
+	return f.name
 }
 
 func (f *File) GetPath() string {
-	return f.Path
+	return f.path
 }
 
 func (f *File) GetExtension() string {
-	return f.Extension
+	return f.extension
 }
 
 func (f *File) GetFilename() string {
-	return f.Name + f.Extension
+	return f.name + f.extension
 }
 
 func (f *File) GetFullPath() string {
-	return fmt.Sprintf("%s/%s.%s", f.Path, f.Name, f.Extension)
+	return fmt.Sprintf("%s/%s.%s", f.path, f.name, f.extension)
 }

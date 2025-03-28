@@ -14,35 +14,35 @@ import (
 )
 
 type Job struct {
-	DB           *sql.DB
-	File         entity.File
-	Result       entity.Result
-	OutputFolder string
+	db           *sql.DB
+	file         entity.File
+	result       entity.Result
+	outputFolder string
 }
 
 func NewJob(db *sql.DB, file entity.File, outputFolder string) *Job {
 	return &Job{
-		DB:           db,
-		File:         file,
-		Result:       entity.Result{},
-		OutputFolder: outputFolder,
+		db:           db,
+		file:         file,
+		result:       entity.Result{},
+		outputFolder: outputFolder,
 	}
 }
 
 func (b *Job) GetDB() *sql.DB {
-	return b.DB
+	return b.db
 }
 
 func (b *Job) GetFile() entity.File {
-	return b.File
+	return b.file
 }
 
 func (b *Job) GetResult() entity.Result {
-	return b.Result
+	return b.result
 }
 
 func (b *Job) GetOutputFolder() string {
-	return b.OutputFolder
+	return b.outputFolder
 }
 
 func (b *Job) Extract() error {
@@ -52,21 +52,21 @@ func (b *Job) Extract() error {
 
 	defer func() {
 		finishedAt = time.Now()
-		log.Printf("🌟 [%s] Data extraction with sucess. It took %v\n", b.File.GetName(), finishedAt.Sub(startedAt))
+		log.Printf("🌟 [%s] Data extraction with sucess. It took %v\n", b.file.GetName(), finishedAt.Sub(startedAt))
 	}()
 
 	// Load query from file
-	query, err := filesystem.LoadFile(b.File)
+	query, err := filesystem.LoadFile(b.file)
 	if err != nil {
 		return err
 	}
-	log.Printf("📄 [%s] Query loaded\n", b.File.GetName())
+	log.Printf("📄 [%s] Query loaded\n", b.file.GetName())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
 	// Execute query
-	log.Printf("🏃 [%s] Executing query\n", b.File.GetName())
+	log.Printf("🏃 [%s] Executing query\n", b.file.GetName())
 	rows, err := b.GetDB().QueryContext(ctx, query)
 	if err != nil {
 		return err
@@ -107,7 +107,7 @@ func (b *Job) Extract() error {
 		}
 		rowsData = append(rowsData, rowData)
 	}
-	b.Result = *entity.NewResult(columns, rowsData, startedAt, time.Now())
+	b.result = *entity.NewResult(columns, rowsData, startedAt, time.Now())
 
 	return nil
 
@@ -120,25 +120,25 @@ func (b *Job) Dump(format string) error {
 
 	defer func() {
 		finishedAt = time.Now()
-		log.Printf("📦 [%s] Dump generated with sucess. It took %v\n", b.File.GetName(), finishedAt.Sub(startedAt))
+		log.Printf("📦 [%s] Dump generated with sucess. It took %v\n", b.file.GetName(), finishedAt.Sub(startedAt))
 	}()
 
-	log.Printf("📦 [%s] Dumping %d rows\n", b.File.GetName(), b.Result.GetTotalRows())
+	log.Printf("📦 [%s] Dumping %d rows\n", b.file.GetName(), b.result.GetTotalRows())
 
 	var buffer bytes.Buffer
 	switch format {
 	case "csv":
-		buffer.WriteString(csv.Header(b.Result.GetColumnsName()))
-		buffer.WriteString(csv.Detail(b.Result.GetColumnsName(), b.Result.GetRows()))
+		buffer.WriteString(csv.Header(b.result.GetColumnsName()))
+		buffer.WriteString(csv.Detail(b.result.GetColumnsName(), b.result.GetRows()))
 	default:
 		return fmt.Errorf("☠️ Error: Format %s not supported", format)
 	}
 
-	if err := filesystem.CreateFolder(b.OutputFolder); err != nil {
+	if err := filesystem.CreateFolder(b.outputFolder); err != nil {
 		return err
 	}
 
-	if err := filesystem.WriteFile(b.OutputFolder+"/"+b.File.GetName()+".csv", buffer.String()); err != nil {
+	if err := filesystem.WriteFile(b.outputFolder+"/"+b.file.GetName()+".csv", buffer.String()); err != nil {
 		return err
 	}
 
