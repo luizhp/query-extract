@@ -6,12 +6,12 @@ import (
 
 type Result struct {
 	columns    []Column
-	rows       []map[string]interface{}
+	rows       []map[string]string
 	startedAt  time.Time
 	finishedAt time.Time
 }
 
-func NewResult(columns []Column, rows []map[string]interface{}, startedAt time.Time, finishedAt time.Time) *Result {
+func NewResult(columns []Column, rows []map[string]string, startedAt time.Time, finishedAt time.Time) *Result {
 	return &Result{
 		columns:    columns,
 		rows:       rows,
@@ -32,7 +32,7 @@ func (r *Result) GetColumnsName() []string {
 	return columns
 }
 
-func (r *Result) GetRows() []map[string]interface{} {
+func (r *Result) GetRows() []map[string]string {
 	return r.rows
 }
 

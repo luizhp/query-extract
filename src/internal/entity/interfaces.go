@@ -15,7 +15,7 @@ type FileInterface interface {
 
 type ResultInterface interface {
 	GetColumns() []Column
-	GetRows() []map[string]interface{}
+	GetRows() []map[string]string
 	GetTotalRows() int
 	GetStartedAt() time.Time
 	GetFinishedAt() time.Time

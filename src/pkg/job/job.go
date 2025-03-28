@@ -13,6 +13,7 @@ import (
 	"github.com/luizhp/query-extract/internal/entity"
 	"github.com/luizhp/query-extract/internal/infra/csv"
 	"github.com/luizhp/query-extract/internal/infra/filesystem"
+	"github.com/luizhp/query-extract/pkg/strutil"
 )
 
 type Job struct {
@@ -92,7 +93,7 @@ func (b *Job) Extract() error {
 	}
 
 	// Get Rows
-	var rowsData []map[string]interface{}
+	var rowsData []map[string]string
 	for rows.Next() {
 		columnsData := make([]interface{}, len(columns))
 		columnsPointers := make([]interface{}, len(columns))
@@ -103,14 +104,14 @@ func (b *Job) Extract() error {
 		if err != nil {
 			return err
 		}
-		rowData := make(map[string]interface{})
+		rowData := make(map[string]string)
 		for i, column := range columns {
 			val := columnsPointers[i].(*interface{})
 			convertedValue, err := b.convert(column, val)
 			if err != nil {
 				return err
 			}
-			rowData[column.GetName()] = convertedValue
+			rowData[column.GetName()] = strutil.RemoveSpecialCodes(convertedValue)
 		}
 		rowsData = append(rowsData, rowData)
 	}
@@ -121,15 +122,15 @@ func (b *Job) Extract() error {
 }
 
 func (b *Job) convert(dataType entity.Column, dataValue *interface{}) (string, error) {
-
-	if dataValue == nil {
-		return "", nil
-	}
+	fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
 
 	var convertedValue string = ""
 
-	switch dataType.GetScanType().Kind() {
+	if dataValue == nil {
+		return convertedValue, nil
+	}
 
+	switch dataType.GetScanType().Kind() {
 	// Integer
 	case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
 		convertedValue = fmt.Sprintf("%d", *dataValue)
@@ -139,7 +140,15 @@ func (b *Job) convert(dataType entity.Column, dataValue *interface{}) (string, e
 	case reflect.Slice:
 		switch dataType.GetScanType().Elem().Kind() {
 		case reflect.Uint8:
-			convertedValue = string((*dataValue).([]uint8))
+			switch dataType.GetDatabaseTypeName() {
+			case "IMAGE":
+				// convertedValue = fmt.Sprintf("0x%x", (*dataValue).([]uint8))
+				convertedValue = ""
+			case "DECIMAL":
+				convertedValue = string((*dataValue).([]uint8))
+			default:
+				convertedValue = string((*dataValue).([]uint8))
+			}
 		default:
 			convertedValue = string((*dataValue).([]uint8))
 		}
@@ -154,6 +163,28 @@ func (b *Job) convert(dataType entity.Column, dataValue *interface{}) (string, e
 			convertedValue = fmt.Sprintf("%f", *dataValue)
 		}
 		convertedValue = strings.TrimRight(convertedValue, "0")
+		// String
+	case reflect.String:
+		switch dataType.GetDatabaseTypeName() {
+		case "CHAR":
+			convertedValue = fmt.Sprintf("%s", *dataValue)
+		case "VARCHAR":
+			convertedValue = fmt.Sprintf("%s", *dataValue)
+		case "TEXT":
+			convertedValue = fmt.Sprintf("%s", *dataValue)
+		case "NCHAR":
+			convertedValue = fmt.Sprintf("%s", *dataValue)
+		case "NVARCHAR":
+			convertedValue = fmt.Sprintf("%s", *dataValue)
+		case "NTEXT":
+			convertedValue = fmt.Sprintf("%s", *dataValue)
+		default:
+			convertedValue = fmt.Sprintf("%s", *dataValue)
+		}
+	// Bool
+	case reflect.Bool:
+		convertedValue = fmt.Sprintf("%t", *dataValue)
+	// Struct
 	case reflect.Struct:
 		switch dataType.GetScanType() {
 		case reflect.TypeOf(time.Time{}):
@@ -194,8 +225,7 @@ func (b *Job) Dump(format string) error {
 	var buffer bytes.Buffer
 	switch format {
 	case "csv":
-		buffer.WriteString(csv.Header(b.result.GetColumnsName()))
-		buffer.WriteString(csv.Detail(b.result.GetColumnsName(), b.result.GetRows()))
+		buffer.WriteString(csv.Generate(b.result.GetColumnsName(), b.result.GetRows()))
 	default:
 		return fmt.Errorf("☠️ Error: Format %s not supported", format)
 	}
@@ -207,8 +237,6 @@ func (b *Job) Dump(format string) error {
 	if err := filesystem.WriteFile(b.outputFolder+"/"+b.file.GetName()+".csv", buffer.String()); err != nil {
 		return err
 	}
-
-	// fmt.Println(buffer.String())
 
 	return nil
 }
