@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/luizhp/query-extract/internal/entity"
@@ -129,9 +130,32 @@ func (b *Job) convert(dataType entity.Column, dataValue *interface{}) (string, e
 
 	switch dataType.GetScanType().Kind() {
 
+	// Integer
 	case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
 		convertedValue = fmt.Sprintf("%d", *dataValue)
+	case reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8, reflect.Uint:
+		convertedValue = fmt.Sprintf("%d", *dataValue)
+	// Decimal
+	case reflect.Slice:
+		switch dataType.GetScanType().Elem().Kind() {
+		case reflect.Uint8:
+			convertedValue = string((*dataValue).([]uint8))
+		default:
+			convertedValue = string((*dataValue).([]uint8))
+		}
+	// Float
+	case reflect.Float64, reflect.Float32:
+		switch dataType.GetDatabaseTypeName() {
+		case "FLOAT":
+			convertedValue = fmt.Sprintf("%g", *dataValue)
+		case "REAL":
+			convertedValue = fmt.Sprintf("%f", *dataValue)
+		default:
+			convertedValue = fmt.Sprintf("%f", *dataValue)
+		}
+		convertedValue = strings.TrimRight(convertedValue, "0")
 	default:
+		fmt.Printf("coluna: %s - formato: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetDatabaseTypeName())
 		convertedValue = "."
 	}
 
