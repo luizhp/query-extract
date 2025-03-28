@@ -154,11 +154,28 @@ func (b *Job) convert(dataType entity.Column, dataValue *interface{}) (string, e
 			convertedValue = fmt.Sprintf("%f", *dataValue)
 		}
 		convertedValue = strings.TrimRight(convertedValue, "0")
+	case reflect.Struct:
+		switch dataType.GetScanType() {
+		case reflect.TypeOf(time.Time{}):
+			switch dataType.GetDatabaseTypeName() {
+			case "DATE":
+				convertedValue = (*dataValue).(time.Time).Format("2006-01-02 ")
+			case "TIME":
+				convertedValue = (*dataValue).(time.Time).Format("15:04:05")
+			case "DATETIME", "SMALLDATETIME", "DATETIME2":
+				convertedValue = (*dataValue).(time.Time).Format("2006-01-02 15:04:05.000 ")
+			case "DATETIMEOFFSET":
+				convertedValue = (*dataValue).(time.Time).Format("2006-01-02 15:04:05.000 -0700")
+			default:
+				convertedValue = (*dataValue).(time.Time).Format("2006-01-02 15:04:05.000 ")
+			}
+		default:
+			convertedValue = fmt.Sprintf("%v", *dataValue)
+		}
 	default:
-		fmt.Printf("coluna: %s - formato: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetDatabaseTypeName())
+		fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
 		convertedValue = "."
 	}
-
 	return convertedValue, nil
 }
 
