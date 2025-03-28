@@ -1,17 +1,19 @@
 package entity
 
+import "reflect"
+
 type Column struct {
 	position         int
 	name             string
 	databaseTypeName string
-	scanType         interface{}
+	scanType         reflect.Type
 	length           int64
 	precision        int64
 	scale            int64
 	nullable         bool
 }
 
-func NewColumn(position int, name, databaseTypeName string, scanType interface{}, length, precision, scale int64, nullable bool) *Column {
+func NewColumn(position int, name, databaseTypeName string, scanType reflect.Type, length, precision, scale int64, nullable bool) *Column {
 	return &Column{
 		position:         position,
 		name:             name,

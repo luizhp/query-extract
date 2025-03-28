@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"reflect"
 	"time"
 
 	"github.com/luizhp/query-extract/internal/entity"
@@ -85,7 +86,8 @@ func (b *Job) Extract() error {
 		length, _ := columnType.Length()
 		precision, scale, _ := columnType.DecimalSize()
 		nullable, _ := columnType.Nullable()
-		columns = append(columns, *entity.NewColumn(i, columnType.Name(), columnType.DatabaseTypeName(), columnType.ScanType(), length, precision, scale, nullable))
+		var rt reflect.Type = columnType.ScanType()
+		columns = append(columns, *entity.NewColumn(i, columnType.Name(), columnType.DatabaseTypeName(), rt, length, precision, scale, nullable))
 	}
 
 	// Get Rows
