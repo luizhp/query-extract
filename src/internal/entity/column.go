@@ -38,7 +38,7 @@ func (r *Column) GetDatabaseTypeName() string {
 	return r.databaseTypeName
 }
 
-func (r *Column) GetScanType() interface{} {
+func (r *Column) GetScanType() reflect.Type {
 	return r.scanType
 }
 

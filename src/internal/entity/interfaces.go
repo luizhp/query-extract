@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"reflect"
+	"time"
+)
 
 type FileInterface interface {
 	GetName() string
@@ -23,7 +26,7 @@ type ColumnInterface interface {
 	GetPosition() int
 	GetName() string
 	GetDatabaseTypeName() string
-	GetScanType() interface{}
+	GetScanType() reflect.Type
 	GetLength() int64
 	GetPrecision() int64
 	GetScale() int64

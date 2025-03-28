@@ -105,7 +105,11 @@ func (b *Job) Extract() error {
 		rowData := make(map[string]interface{})
 		for i, column := range columns {
 			val := columnsPointers[i].(*interface{})
-			rowData[column.GetName()] = *val
+			convertedValue, err := b.convert(column, val)
+			if err != nil {
+				return err
+			}
+			rowData[column.GetName()] = convertedValue
 		}
 		rowsData = append(rowsData, rowData)
 	}
@@ -113,6 +117,25 @@ func (b *Job) Extract() error {
 
 	return nil
 
+}
+
+func (b *Job) convert(dataType entity.Column, dataValue *interface{}) (string, error) {
+
+	if dataValue == nil {
+		return "", nil
+	}
+
+	var convertedValue string = ""
+
+	switch dataType.GetScanType().Kind() {
+
+	case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
+		convertedValue = fmt.Sprintf("%d", *dataValue)
+	default:
+		convertedValue = "."
+	}
+
+	return convertedValue, nil
 }
 
 func (b *Job) Dump(format string) error {
