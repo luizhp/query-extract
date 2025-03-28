@@ -11,7 +11,7 @@ type FileInterface interface {
 }
 
 type ResultInterface interface {
-	GetColumns() []string
+	GetColumns() []Column
 	GetRows() []map[string]interface{}
 	GetTotalRows() int
 	GetStartedAt() time.Time
@@ -20,7 +20,7 @@ type ResultInterface interface {
 }
 
 type ColumnInterface interface {
-	GetPosition() int64
+	GetPosition() int
 	GetName() string
 	GetDatabaseTypeName() string
 	GetScanType() interface{}

@@ -5,43 +5,49 @@ import (
 )
 
 type Result struct {
-	Columns    []string
-	Rows       []map[string]interface{}
-	TotalRows  int
-	StartedAt  time.Time
-	FinishedAt time.Time
+	columns    []Column
+	rows       []map[string]interface{}
+	startedAt  time.Time
+	finishedAt time.Time
 }
 
-func NewResult(columns []string, rows []map[string]interface{}, startedAt time.Time, finishedAt time.Time) *Result {
+func NewResult(columns []Column, rows []map[string]interface{}, startedAt time.Time, finishedAt time.Time) *Result {
 	return &Result{
-		Columns:    columns,
-		Rows:       rows,
-		TotalRows:  len(rows),
-		StartedAt:  startedAt,
-		FinishedAt: finishedAt,
+		columns:    columns,
+		rows:       rows,
+		startedAt:  startedAt,
+		finishedAt: finishedAt,
 	}
 }
 
-func (r *Result) GetColumns() []string {
-	return r.Columns
+func (r *Result) GetColumnsMetadata() []Column {
+	return r.columns
+}
+
+func (r *Result) GetColumnsName() []string {
+	var columns []string
+	for _, c := range r.columns {
+		columns = append(columns, c.GetName())
+	}
+	return columns
 }
 
 func (r *Result) GetRows() []map[string]interface{} {
-	return r.Rows
+	return r.rows
 }
 
 func (r *Result) GetTotalRows() int {
-	return len(r.Rows)
+	return len(r.rows)
 }
 
 func (r *Result) GetStartedAt() time.Time {
-	return r.StartedAt
+	return r.startedAt
 }
 
 func (r *Result) GetFinishedAt() time.Time {
-	return r.FinishedAt
+	return r.finishedAt
 }
 
 func (r *Result) GetDuration() time.Duration {
-	return r.FinishedAt.Sub(r.StartedAt)
+	return r.finishedAt.Sub(r.startedAt)
 }

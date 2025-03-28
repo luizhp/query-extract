@@ -66,48 +66,26 @@ func (b *Job) Extract() error {
 	defer cancel()
 
 	// Execute query
+	log.Printf("🏃 [%s] Executing query\n", b.File.GetName())
 	rows, err := b.GetDB().QueryContext(ctx, query)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
-	log.Printf("🏃 [%s] Executing query\n", b.File.GetName())
 
-	// Get Column Names
-	columns, err := rows.Columns()
-	if err != nil {
-		return err
-	}
+	// Get Columns' Metadata
+	var columns []entity.Column
 
 	columnsTypes, err := rows.ColumnTypes()
 	if err != nil {
 		return err
 	}
-	for _, columnType := range columnsTypes {
-		// log.Printf("🔍 [%s] Column %s is of type %s\n", b.File.GetName(), columns[i], columnType.DatabaseTypeName())
 
-		log.Printf("🔍 Column Name: %s\n", columnType.Name())
-		log.Printf("Column DatabaseTypeName: %s\n", columnType.DatabaseTypeName())
-
-		length, ok := columnType.Length()
-		if ok {
-			log.Printf("Column has length %d\n", length)
-		}
-
-		precision, scale, ok := columnType.DecimalSize()
-		if ok {
-			log.Printf("Column has precision %d and scale %d\n", precision, scale)
-		}
-
-		log.Printf("Column ScanType: %s\n", columnType.ScanType())
-		nullable, ok := columnType.Nullable()
-		if ok {
-			log.Printf("Column Nullable: %t\n", nullable)
-		}
-
-		// log.Printf("Column ScanType Align: %v ", columnType.ScanType().Align())
-		// log.Printf("Column ScanType Bits: %v ", columnType.ScanType().Bits())
-
+	for i, columnType := range columnsTypes {
+		length, _ := columnType.Length()
+		precision, scale, _ := columnType.DecimalSize()
+		nullable, _ := columnType.Nullable()
+		columns = append(columns, *entity.NewColumn(i, columnType.Name(), columnType.DatabaseTypeName(), columnType.ScanType(), length, precision, scale, nullable))
 	}
 
 	// Get Rows
@@ -125,7 +103,7 @@ func (b *Job) Extract() error {
 		rowData := make(map[string]interface{})
 		for i, column := range columns {
 			val := columnsPointers[i].(*interface{})
-			rowData[column] = *val
+			rowData[column.GetName()] = *val
 		}
 		rowsData = append(rowsData, rowData)
 	}
@@ -150,8 +128,8 @@ func (b *Job) Dump(format string) error {
 	var buffer bytes.Buffer
 	switch format {
 	case "csv":
-		buffer.WriteString(csv.Header(b.Result.GetColumns()))
-		buffer.WriteString(csv.Detail(b.Result.GetColumns(), b.Result.GetRows()))
+		buffer.WriteString(csv.Header(b.Result.GetColumnsName()))
+		buffer.WriteString(csv.Detail(b.Result.GetColumnsName(), b.Result.GetRows()))
 	default:
 		return fmt.Errorf("☠️ Error: Format %s not supported", format)
 	}
