@@ -62,7 +62,7 @@ func main() {
 
 	// Process each job
 	for _, queryFile := range queriesCollection {
-		job := job.NewJob(db.GetDB(), queryFile, outputFolder)
+		job := job.NewJob(db, queryFile, outputFolder)
 		if err := job.Extract(); err != nil {
 			log.Printf("☠️ Error: %v\n", err)
 			os.Exit(1)
