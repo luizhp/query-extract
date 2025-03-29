@@ -122,11 +122,9 @@ func (b *Job) Extract() error {
 }
 
 func (b *Job) convert(dataType entity.Column, dataValue *interface{}) (string, error) {
-	fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
-
 	var convertedValue string = ""
 
-	if dataValue == nil {
+	if dataValue == nil || dataType.GetScanType() == nil {
 		return convertedValue, nil
 	}
 
@@ -141,11 +139,14 @@ func (b *Job) convert(dataType entity.Column, dataValue *interface{}) (string, e
 		switch dataType.GetScanType().Elem().Kind() {
 		case reflect.Uint8:
 			switch dataType.GetDatabaseTypeName() {
-			case "IMAGE":
-				// convertedValue = fmt.Sprintf("0x%x", (*dataValue).([]uint8))
-				convertedValue = ""
 			case "DECIMAL":
 				convertedValue = string((*dataValue).([]uint8))
+			case "IMAGE":
+				convertedValue = ""
+			case "UNIQUEIDENTIFIER":
+				convertedValue = ""
+			case "GEOGRAPHY", "GEOMETRY", "HIERARCHYID":
+				convertedValue = ""
 			default:
 				convertedValue = string((*dataValue).([]uint8))
 			}
@@ -204,8 +205,13 @@ func (b *Job) convert(dataType entity.Column, dataValue *interface{}) (string, e
 			convertedValue = fmt.Sprintf("%v", *dataValue)
 		}
 	default:
-		fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
-		convertedValue = "."
+		switch dataType.GetDatabaseTypeName() {
+		case "SQL_VARIANT":
+			convertedValue = ""
+		default:
+			fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
+			convertedValue = fmt.Sprintf("%v", *dataValue)
+		}
 	}
 	return convertedValue, nil
 }
