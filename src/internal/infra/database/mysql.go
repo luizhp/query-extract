@@ -62,25 +62,29 @@ func (m *MySQLInstance) Convert(dataType entity.Column, dataValue *interface{}) 
 		convertedValue = fmt.Sprintf("%d", *dataValue)
 	case reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8, reflect.Uint:
 		convertedValue = fmt.Sprintf("%d", *dataValue)
-	// // Decimal
-	// case reflect.Slice:
-	// 	switch dataType.GetScanType().Elem().Kind() {
-	// 	case reflect.Uint8:
-	// 		switch dataType.GetDatabaseTypeName() {
-	// 		case "DECIMAL":
-	// 			convertedValue = string((*dataValue).([]uint8))
-	// 		case "IMAGE":
-	// 			convertedValue = ""
-	// 		case "UNIQUEIDENTIFIER":
-	// 			convertedValue = ""
-	// 		case "GEOGRAPHY", "GEOMETRY", "HIERARCHYID":
-	// 			convertedValue = ""
-	// 		default:
-	// 			convertedValue = string((*dataValue).([]uint8))
-	// 		}
-	// 	default:
-	// 		convertedValue = string((*dataValue).([]uint8))
-	// 	}
+	// Decimal
+	case reflect.Slice:
+		switch dataType.GetScanType().Elem().Kind() {
+		case reflect.Uint8:
+			switch dataType.GetDatabaseTypeName() {
+			case "BLOB":
+				convertedValue = string((*dataValue).([]byte))
+			// case "DECIMAL":
+			// 	convertedValue = string((*dataValue).([]uint8))
+			// case "IMAGE":
+			// 	convertedValue = ""
+			// case "UNIQUEIDENTIFIER":
+			// 	convertedValue = ""
+			// case "GEOGRAPHY", "GEOMETRY", "HIERARCHYID":
+			// 	convertedValue = ""
+			default:
+				fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
+				convertedValue = string((*dataValue).([]uint8))
+			}
+		default:
+			fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
+			convertedValue = string((*dataValue).([]uint8))
+		}
 	// // Float
 	// case reflect.Float64, reflect.Float32:
 	// 	switch dataType.GetDatabaseTypeName() {
@@ -140,6 +144,10 @@ func (m *MySQLInstance) Convert(dataType entity.Column, dataValue *interface{}) 
 			case "VARCHAR":
 				convertedValue = fmt.Sprintf("%s", *dataValue)
 			case "TEXT":
+				convertedValue = fmt.Sprintf("%s", *dataValue)
+			case "ENUM":
+				convertedValue = fmt.Sprintf("%s", *dataValue)
+			case "SET":
 				convertedValue = fmt.Sprintf("%s", *dataValue)
 			default:
 				fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
