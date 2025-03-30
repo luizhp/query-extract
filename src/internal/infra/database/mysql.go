@@ -132,7 +132,29 @@ func (m *MySQLInstance) Convert(dataType entity.Column, dataValue *interface{}) 
 		// 		convertedValue = (*dataValue).(time.Time).Format("2006-01-02 15:04:05.000 ")
 		// 	}
 		case reflect.TypeOf(sql.NullString{}):
-			convertedValue = fmt.Sprintf("%s", *dataValue)
+			switch dataType.GetDatabaseTypeName() {
+			case "DECIMAL":
+				convertedValue = fmt.Sprintf("%s", *dataValue)
+			case "CHAR":
+				convertedValue = fmt.Sprintf("%s", *dataValue)
+			case "VARCHAR":
+				convertedValue = fmt.Sprintf("%s", *dataValue)
+			case "TEXT":
+				convertedValue = fmt.Sprintf("%s", *dataValue)
+			default:
+				fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
+				convertedValue = fmt.Sprintf("%v", *dataValue)
+			}
+		case reflect.TypeOf(sql.NullFloat64{}):
+			switch dataType.GetDatabaseTypeName() {
+			case "FLOAT":
+				convertedValue = fmt.Sprintf("%g", *dataValue)
+			case "DOUBLE":
+				convertedValue = fmt.Sprintf("%g", *dataValue)
+			default:
+				fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
+				convertedValue = fmt.Sprintf("%v", *dataValue)
+			}
 		default:
 			fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
 			convertedValue = fmt.Sprintf("%v", *dataValue)
