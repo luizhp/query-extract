@@ -69,6 +69,8 @@ func (m *MySQLInstance) Convert(dataType entity.Column, dataValue *interface{}) 
 			switch dataType.GetDatabaseTypeName() {
 			case "BLOB":
 				convertedValue = string((*dataValue).([]byte))
+			case "BINARY":
+				convertedValue = string((*dataValue).([]byte))
 			// case "DECIMAL":
 			// 	convertedValue = string((*dataValue).([]uint8))
 			// case "IMAGE":
@@ -152,9 +154,11 @@ func (m *MySQLInstance) Convert(dataType entity.Column, dataValue *interface{}) 
 				convertedValue = fmt.Sprintf("%s", *dataValue)
 			case "TIME":
 				convertedValue = fmt.Sprintf("%s", *dataValue)
+			case "JSON":
+				convertedValue = fmt.Sprintf("%s", *dataValue)
 			default:
 				fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
-				convertedValue = fmt.Sprintf("%v", *dataValue)
+				convertedValue = fmt.Sprintf("%s", *dataValue)
 			}
 		case reflect.TypeOf(sql.NullFloat64{}):
 			switch dataType.GetDatabaseTypeName() {
@@ -164,11 +168,11 @@ func (m *MySQLInstance) Convert(dataType entity.Column, dataValue *interface{}) 
 				convertedValue = fmt.Sprintf("%g", *dataValue)
 			default:
 				fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
-				convertedValue = fmt.Sprintf("%v", *dataValue)
+				convertedValue = fmt.Sprintf("%s", *dataValue)
 			}
 		default:
 			fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
-			convertedValue = fmt.Sprintf("%v", *dataValue)
+			convertedValue = fmt.Sprintf("%s", *dataValue)
 		}
 	default:
 		switch dataType.GetDatabaseTypeName() {
@@ -176,7 +180,7 @@ func (m *MySQLInstance) Convert(dataType entity.Column, dataValue *interface{}) 
 		// 	convertedValue = ""
 		default:
 			fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
-			convertedValue = fmt.Sprintf("%v", *dataValue)
+			convertedValue = fmt.Sprintf("%s", *dataValue)
 		}
 	}
 	return convertedValue, nil
