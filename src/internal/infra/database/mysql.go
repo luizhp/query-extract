@@ -122,19 +122,20 @@ func (m *MySQLInstance) Convert(dataType entity.Column, dataValue *interface{}) 
 		switch dataType.GetScanType() {
 		case reflect.TypeOf(sql.NullInt64{}), reflect.TypeOf(sql.NullInt32{}), reflect.TypeOf(sql.NullInt16{}):
 			convertedValue = fmt.Sprintf("%d", *dataValue)
-		// case reflect.TypeOf(time.Time{}):
-		// 	switch dataType.GetDatabaseTypeName() {
-		// 	case "DATE":
-		// 		convertedValue = (*dataValue).(time.Time).Format("2006-01-02 ")
-		// 	case "TIME":
-		// 		convertedValue = (*dataValue).(time.Time).Format("15:04:05")
-		// 	case "DATETIME", "SMALLDATETIME", "DATETIME2":
-		// 		convertedValue = (*dataValue).(time.Time).Format("2006-01-02 15:04:05.000 ")
-		// 	case "DATETIMEOFFSET":
-		// 		convertedValue = (*dataValue).(time.Time).Format("2006-01-02 15:04:05.000 -0700")
-		// 	default:
-		// 		convertedValue = (*dataValue).(time.Time).Format("2006-01-02 15:04:05.000 ")
-		// 	}
+		case reflect.TypeOf(sql.NullTime{}):
+			switch dataType.GetDatabaseTypeName() {
+			case "DATE":
+				convertedValue = fmt.Sprintf("%s", *dataValue)
+			case "DATETIME":
+				convertedValue = fmt.Sprintf("%s", *dataValue)
+			case "TIMESTAMP":
+				convertedValue = fmt.Sprintf("%s", *dataValue)
+			// case "DATETIMEOFFSET":
+			// 	convertedValue = (*dataValue).(time.Time).Format("2006-01-02 15:04:05.000 -0700")
+			default:
+				fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
+				convertedValue = "" //(*dataValue).(time.Time).Format("2006-01-02 15:04:05.000 ")
+			}
 		case reflect.TypeOf(sql.NullString{}):
 			switch dataType.GetDatabaseTypeName() {
 			case "DECIMAL":
@@ -148,6 +149,8 @@ func (m *MySQLInstance) Convert(dataType entity.Column, dataValue *interface{}) 
 			case "ENUM":
 				convertedValue = fmt.Sprintf("%s", *dataValue)
 			case "SET":
+				convertedValue = fmt.Sprintf("%s", *dataValue)
+			case "TIME":
 				convertedValue = fmt.Sprintf("%s", *dataValue)
 			default:
 				fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
