@@ -35,3 +35,11 @@ select
 , HierarchyIdColumn
 
 from DataTypesExample
+
+-- Not yet
+-- ImageColumn
+-- UniqueIdentifierColumn
+-- GeometryColumn
+-- GeographyColumn
+-- HierarchyIdColumn
+-- SqlVariantColumn
