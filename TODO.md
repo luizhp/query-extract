@@ -3,9 +3,10 @@
 | Instance     |   Up   | Tested  |
 |:------------:|:------:|:-------:|
 | MySQL 8      |   ⬆️    |   ✔️    |
-| MSSQL        |   ⬆️    |         |
+| MSSQL        |   ⬆️    |   ✔️    |
 | PostgreSQL   |        |         |
 | Oracle       |        |         |
+| SQLite       |        |         |
 
 # Feature Request
 

@@ -39,6 +39,7 @@ func main() {
 	}
 
 	// Get Target DB connection
+	// MSSQL Server
 	// var db database.DBInstance
 	// dsn := "sqlserver://sa:StrongPassword123@localhost?database=queryextract"
 	// db, err = database.NewMSSQLInstance(dsn)

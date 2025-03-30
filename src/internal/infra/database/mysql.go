@@ -69,16 +69,10 @@ func (m *MySQLInstance) Convert(dataType entity.Column, dataValue *interface{}) 
 			switch dataType.GetDatabaseTypeName() {
 			case "BLOB":
 				convertedValue = string((*dataValue).([]byte))
-			case "BINARY":
+			case "BINARY", "VARBINARY":
 				convertedValue = string((*dataValue).([]byte))
-			// case "DECIMAL":
-			// 	convertedValue = string((*dataValue).([]uint8))
-			// case "IMAGE":
-			// 	convertedValue = ""
-			// case "UNIQUEIDENTIFIER":
-			// 	convertedValue = ""
-			// case "GEOGRAPHY", "GEOMETRY", "HIERARCHYID":
-			// 	convertedValue = ""
+			case "GEOMETRY":
+				convertedValue = ""
 			default:
 				fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
 				convertedValue = string((*dataValue).([]uint8))
@@ -87,38 +81,6 @@ func (m *MySQLInstance) Convert(dataType entity.Column, dataValue *interface{}) 
 			fmt.Printf("coluna: %s - formato: %s - kind: %s - dbformat: %s\n", dataType.GetName(), dataType.GetScanType(), dataType.GetScanType().Kind(), dataType.GetDatabaseTypeName())
 			convertedValue = string((*dataValue).([]uint8))
 		}
-	// // Float
-	// case reflect.Float64, reflect.Float32:
-	// 	switch dataType.GetDatabaseTypeName() {
-	// 	case "FLOAT":
-	// 		convertedValue = fmt.Sprintf("%g", *dataValue)
-	// 	case "REAL":
-	// 		convertedValue = fmt.Sprintf("%f", *dataValue)
-	// 	default:
-	// 		convertedValue = fmt.Sprintf("%f", *dataValue)
-	// 	}
-	// 	convertedValue = strings.TrimRight(convertedValue, "0")
-	// 	// String
-	// case reflect.String:
-	// 	switch dataType.GetDatabaseTypeName() {
-	// 	case "CHAR":
-	// 		convertedValue = fmt.Sprintf("%s", *dataValue)
-	// 	case "VARCHAR":
-	// 		convertedValue = fmt.Sprintf("%s", *dataValue)
-	// 	case "TEXT":
-	// 		convertedValue = fmt.Sprintf("%s", *dataValue)
-	// 	case "NCHAR":
-	// 		convertedValue = fmt.Sprintf("%s", *dataValue)
-	// 	case "NVARCHAR":
-	// 		convertedValue = fmt.Sprintf("%s", *dataValue)
-	// 	case "NTEXT":
-	// 		convertedValue = fmt.Sprintf("%s", *dataValue)
-	// 	default:
-	// 		convertedValue = fmt.Sprintf("%s", *dataValue)
-	// 	}
-	// // Bool
-	// case reflect.Bool:
-	// 	convertedValue = fmt.Sprintf("%t", *dataValue)
 	// Struct
 	case reflect.Struct:
 		switch dataType.GetScanType() {
