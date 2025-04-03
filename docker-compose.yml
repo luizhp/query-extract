@@ -22,7 +22,7 @@ services:
     volumes:
       - ./data/docker/sqlserver:/var/opt/mssql
   postgres_db:
-    image: postgres:17.4
+    image: postgres:17-alpine
     container_name: postgres_db
     environment:
       POSTGRES_USER: appuser
